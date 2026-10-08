@@ -1,0 +1,136 @@
+{
+  "lectureId": "1",
+  "duration": 180,
+  "segmentDuration": 30,
+  "audioSegments": [
+    {
+      "index": 0,
+      "start": 0,
+      "end": 30,
+      "url": "audio/audio_0000.webm"
+    },
+    {
+      "index": 1,
+      "start": 30,
+      "end": 60,
+      "url": "audio/audio_0001.webm"
+    },
+    {
+      "index": 2,
+      "start": 60,
+      "end": 90,
+      "url": "audio/audio_0002.webm"
+    },
+    {
+      "index": 3,
+      "start": 90,
+      "end": 120,
+      "url": "audio/audio_0003.webm"
+    },
+    {
+      "index": 4,
+      "start": 120,
+      "end": 150,
+      "url": "audio/audio_0004.webm"
+    },
+    {
+      "index": 5,
+      "start": 150,
+      "end": 180,
+      "url": "audio/audio_0005.webm"
+    },
+    {
+      "index": 6,
+      "start": 180,
+      "end": 210,
+      "url": "audio/audio_0006.webm"
+    }
+  ],
+  "slides": [
+    {
+      "index": 0,
+      "t": 0.0,
+      "url": "slides/0000.png"
+    },
+    {
+      "index": 1,
+      "t": 3.32,
+      "url": "slides/0001.png"
+    },
+    {
+      "index": 2,
+      "t": 5.36,
+      "url": "slides/0002.png"
+    },
+    {
+      "index": 3,
+      "t": 15.3,
+      "url": "slides/0003.png"
+    },
+    {
+      "index": 4,
+      "t": 20.62,
+      "url": "slides/0004.png"
+    },
+    {
+      "index": 5,
+      "t": 24.7,
+      "url": "slides/0005.png"
+    },
+    {
+      "index": 6,
+      "t": 28.76,
+      "url": "slides/0006.png"
+    },
+    {
+      "index": 7,
+      "t": 36.3,
+      "url": "slides/0007.png"
+    },
+    {
+      "index": 8,
+      "t": 46.3,
+      "url": "slides/0008.png"
+    },
+    {
+      "index": 9,
+      "t": 51.14,
+      "url": "slides/0009.png"
+    },
+    {
+      "index": 10,
+      "t": 62.86,
+      "url": "slides/0010.png"
+    },
+    {
+      "index": 11,
+      "t": 74.22,
+      "url": "slides/0011.png"
+    },
+    {
+      "index": 12,
+      "t": 91.74,
+      "url": "slides/0012.png"
+    },
+    {
+      "index": 13,
+      "t": 101.58,
+      "url": "slides/0013.png"
+    },
+    {
+      "index": 14,
+      "t": 104.52,
+      "url": "slides/0014.png"
+    },
+    {
+      "index": 15,
+      "t": 163.52,
+      "url": "slides/0015.png"
+    },
+    {
+      "index": 16,
+      "t": 170.52,
+      "url": "slides/0016.png"
+    }
+  ]
+}
