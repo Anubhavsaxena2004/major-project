@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "BandwidthBridge",
+  "version": "1.0.0",
+  "description": "Adaptive low-bandwidth lecture playback with offline buffering.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8010/*",
+    "http://127.0.0.1:8010/*",
+    "https://interactive-examples.mdn.mozilla.net/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Start BandwidthBridge"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "player.html",
+        "player.js",
+        "player.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

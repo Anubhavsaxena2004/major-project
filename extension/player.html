@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BandwidthBridge</title>
+    <link rel="stylesheet" href="player.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="header">
+        <span class="logo">BandwidthBridge</span>
+        <span id="status">Preparing...</span>
+        <button id="originalBtn">Original Video</button>
+      </div>
+
+      <div id="slideContainer">
+        <img id="slide" alt="Lecture slide" />
+      </div>
+
+      <div id="controls">
+        <button id="playBtn">▶ Play</button>
+        <button id="pauseBtn">⏸ Pause</button>
+        <select id="speed">
+          <option value="0.75">0.75x</option>
+          <option value="1" selected>1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+        </select>
+      </div>
+
+      <div id="audioArea">
+        <audio id="audio" preload="metadata" controls></audio>
+      </div>
+
+      <div id="bufferInfo">Cache: preparing...</div>
+      <div id="offlineBadge">OFFLINE BUFFER MODE</div>
+    </div>
+
+    <script type="module" src="player.js"></script>
+  </body>
+</html>
