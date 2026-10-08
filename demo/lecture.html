@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BandwidthBridge Demo Player</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --border: #334155;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #34d399;
+        --accent-dark: #065f46;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: #0b1120;
+        color: var(--text);
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .frame {
+        width: min(980px, 94vw);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      }
+
+      .meta {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        background: #0f172a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .title {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .actions a, .actions button {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 0.9rem;
+        background: rgba(52, 211, 153, 0.1);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      video {
+        display: block;
+        width: 100%;
+        max-height: 540px;
+        background: black;
+      }
+
+      .banner {
+        padding: 12px 18px;
+        background: #1e293b;
+        font-size: 0.88rem;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border);
+      }
+
+      .badge {
+        background: var(--accent-dark);
+        color: #a7f3d0;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      /* Built-in web player view */
+      #webPlayerView {
+        display: none;
+        flex-direction: column;
+        background: #000;
+      }
+
+      #webPlayerSlideContainer {
+        width: 100%;
+        min-height: 380px;
+        max-height: 520px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #050505;
+      }
+
+      #webPlayerSlide {
+        max-width: 100%;
+        max-height: 520px;
+        object-fit: contain;
+      }
+
+      .web-player-bar {
+        background: #111827;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-top: 1px solid var(--border);
+      }
+
+      .web-player-bar audio {
+        flex: 1;
+        height: 36px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="meta">
+        <div class="title" id="lectureMeta">Loading lecture...</div>
+        <div class="actions">
+          <button id="togglePlayerBtn" type="button">Web Player Mode</button>
+          <a href="/demo/generate.html">Generator</a>
+          <a id="manifestLink" target="_blank">Manifest</a>
+        </div>
+      </div>
+
+      <!-- Original standard video view -->
+      <div id="originalVideoView">
+        <video
+          id="mainVideo"
+          controls
+          data-bb-lecture-id="dbms-01"
+          src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+        ></video>
+      </div>
+
+      <!-- Built-in web player view (synced slides + audio segments) -->
+      <div id="webPlayerView">
+        <div id="webPlayerSlideContainer">
+          <img id="webPlayerSlide" alt="Lecture Slide" />
+        </div>
+        <div class="web-player-bar">
+          <audio id="webPlayerAudio" controls></audio>
+          <span id="webPlayerStatus" style="font-size: 0.85rem; color: var(--muted); min-width: 140px;">Ready</span>
+        </div>
+      </div>
+
+      <div class="banner">
+        <div>
+          <span class="badge">TIP</span>
+          With the Chrome extension installed, click the extension icon to run BandwidthBridge in overlay mode!
+        </div>
+        <div id="lectureIdBadge" style="font-family: monospace; color: var(--accent);">dbms-01</div>
+      </div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const lectureId = params.get('lectureId') || 'dbms-01';
+
+      const mainVideo = document.getElementById('mainVideo');
+      const lectureMeta = document.getElementById('lectureMeta');
+      const lectureIdBadge = document.getElementById('lectureIdBadge');
+      const manifestLink = document.getElementById('manifestLink');
+      const togglePlayerBtn = document.getElementById('togglePlayerBtn');
+      const originalVideoView = document.getElementById('originalVideoView');
+      const webPlayerView = document.getElementById('webPlayerView');
+      const webPlayerSlide = document.getElementById('webPlayerSlide');
+      const webPlayerAudio = document.getElementById('webPlayerAudio');
+      const webPlayerStatus = document.getElementById('webPlayerStatus');
+
+      mainVideo.dataset.bbLectureId = lectureId;
+      lectureIdBadge.textContent = lectureId;
+      lectureMeta.textContent = `${lectureId.toUpperCase()} • Lecture Demo`;
+      manifestLink.href = `/api/lectures/${encodeURIComponent(lectureId)}/manifest`;
+
+      let isWebPlayer = false;
+      let manifest = null;
+      let activeSegmentIndex = -1;
+
+      togglePlayerBtn.addEventListener('click', async () => {
+        if (!isWebPlayer) {
+          isWebPlayer = true;
+          togglePlayerBtn.textContent = 'Original Video Mode';
+          originalVideoView.style.display = 'none';
+          webPlayerView.style.display = 'flex';
+          mainVideo.pause();
+          await initWebPlayer();
+        } else {
+          isWebPlayer = false;
+          togglePlayerBtn.textContent = 'Web Player Mode';
+          originalVideoView.style.display = 'block';
+          webPlayerView.style.display = 'none';
+          webPlayerAudio.pause();
+        }
+      });
+
+      async function initWebPlayer() {
+        try {
+          webPlayerStatus.textContent = 'Loading manifest...';
+          const res = await fetch(`/api/lectures/${encodeURIComponent(lectureId)}/manifest`);
+          if (!res.ok) throw new Error(`Manifest error: HTTP ${res.status}`);
+          manifest = await res.json();
+          manifest.audioSegments.sort((a, b) => a.start - b.start);
+          manifest.slides.sort((a, b) => a.t - b.t);
+
+          if (manifest.slides.length > 0) {
+            webPlayerSlide.src = `/packages/${encodeURIComponent(lectureId)}/${manifest.slides[0].url}`;
+          }
+
+          if (manifest.audioSegments.length > 0) {
+            loadAudioSegment(0, false);
+          }
+          webPlayerStatus.textContent = `Ready (${manifest.audioSegments.length} segments)`;
+        } catch (e) {
+          webPlayerStatus.textContent = `Error: ${e.message}`;
+        }
+      }
+
+      function loadAudioSegment(index, autoPlay = true) {
+        if (!manifest || index >= manifest.audioSegments.length) {
+          webPlayerStatus.textContent = 'Playback finished.';
+          return;
+        }
+
+        activeSegmentIndex = index;
+        const seg = manifest.audioSegments[index];
+        webPlayerAudio.src = `/packages/${encodeURIComponent(lectureId)}/${seg.url}`;
+        webPlayerStatus.textContent = `Segment ${index + 1}/${manifest.audioSegments.length}`;
+
+        if (autoPlay) {
+          webPlayerAudio.play().catch(() => {});
+        }
+      }
+
+      webPlayerAudio.addEventListener('ended', () => {
+        loadAudioSegment(activeSegmentIndex + 1, true);
+      });
+
+      webPlayerAudio.addEventListener('timeupdate', () => {
+        if (!manifest || activeSegmentIndex < 0) return;
+        const seg = manifest.audioSegments[activeSegmentIndex];
+        const currentTime = seg.start + webPlayerAudio.currentTime;
+
+        let activeSlide = manifest.slides[0];
+        for (const s of manifest.slides) {
+          if (s.t <= currentTime) {
+            activeSlide = s;
+          } else {
+            break;
+          }
+        }
+
+        if (activeSlide) {
+          const expectedSrc = `/packages/${encodeURIComponent(lectureId)}/${activeSlide.url}`;
+          if (!webPlayerSlide.src.endsWith(activeSlide.url)) {
+            webPlayerSlide.src = expectedSrc;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
